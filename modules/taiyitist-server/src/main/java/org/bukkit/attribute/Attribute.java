@@ -139,7 +139,12 @@ public enum Attribute implements Keyed, Translatable {
     private final NamespacedKey key;
 
     private Attribute(String key) {
-        this.key = NamespacedKey.minecraft(key);
+        if (key.contains(":")) {
+            String[] parts = key.split(":", 2);
+            this.key = new NamespacedKey(parts[0], parts[1]);
+        } else {
+            this.key = NamespacedKey.minecraft(key);
+        }
     }
 
     @NotNull

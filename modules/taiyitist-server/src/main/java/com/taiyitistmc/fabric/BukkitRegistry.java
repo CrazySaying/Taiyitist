@@ -18,6 +18,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.dedicated.DedicatedServer;
@@ -101,6 +102,7 @@ public class BukkitRegistry {
         loadCookingBookCategory();
         loadFluids();
         loadParticles();
+        loadAttributes();
     }
 
     public static void loadItems() {
@@ -280,6 +282,26 @@ public class BukkitRegistry {
                 }
             }
         }
+    }
+
+    private static void loadAttributes() {
+        var registry = BuiltInRegistries.ATTRIBUTE;
+        for (Attribute attribute : registry) {
+            ResourceLocation resourceLocation = registry.getKey(attribute);
+            if (isMods(resourceLocation)) {
+                String namespace = resourceLocation.getNamespace().toUpperCase(Locale.ENGLISH).replaceAll("[^A-Z0-9_]", "_");
+                String path = normalizeName(resourceLocation.getPath());
+                String name = namespace + "_" + path;
+                NamespacedKey namespacedKey = CraftNamespacedKey.fromMinecraft(resourceLocation);
+                org.bukkit.attribute.Attribute bukkitAttr = MohistDynamEnum.addEnum(org.bukkit.attribute.Attribute.class, name, List.of(String.class), List.of(namespacedKey.toString()));
+                if (bukkitAttr != null) {
+                    attributemap.put(bukkitAttr, resourceLocation);
+                    ((org.bukkit.Registry.SimpleRegistry<org.bukkit.attribute.Attribute>)org.bukkit.Registry.ATTRIBUTE).register(bukkitAttr);
+                    TaiyitistMod.LOGGER.debug("Registered mod Attribute as Attribute(Bukkit) {}: {}", namespacedKey, bukkitAttr.name());
+                }
+            }
+        }
+        TaiyitistMod.LOGGER.info("Registered {} new Attributes", attributemap.size());
     }
 
     private static void loadBiomes(DedicatedServer console) {

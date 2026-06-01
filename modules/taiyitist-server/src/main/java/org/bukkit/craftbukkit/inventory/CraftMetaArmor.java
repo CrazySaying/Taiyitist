@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import org.bukkit.NamespacedKey;
@@ -31,7 +33,22 @@ public class CraftMetaArmor extends CraftMetaItem implements ArmorMeta {
 
         if (meta instanceof CraftMetaArmor armorMeta) {
             this.trim = armorMeta.trim;
+        } else {
+            Optional<?> trimOpt = meta.unhandledTags.build().get(CraftMetaArmor.TRIM.TYPE);
+            trimOpt.ifPresent(val -> {
+                net.minecraft.world.item.armortrim.ArmorTrim nmsTrim =
+                        (net.minecraft.world.item.armortrim.ArmorTrim) val;
+                this.trim = new ArmorTrim(
+                        CraftTrimMaterial.minecraftHolderToBukkit(nmsTrim.material()),
+                        CraftTrimPattern.minecraftHolderToBukkit(nmsTrim.pattern())
+                );
+                if (!nmsTrim.showInTooltip) {
+                    this.addItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
+                }
+            });
         }
+
+        this.unhandledTags.clear(CraftMetaArmor.TRIM.TYPE);
     }
 
     CraftMetaArmor(DataComponentPatch tag) {
@@ -46,6 +63,7 @@ public class CraftMetaArmor extends CraftMetaItem implements ArmorMeta {
             if (!trimCompound.showInTooltip) {
                 this.addItemFlags(ItemFlag.HIDE_ARMOR_TRIM);
             }
+            this.unhandledTags.clear(CraftMetaArmor.TRIM.TYPE);
         });
     }
 

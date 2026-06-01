@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -404,17 +405,21 @@ public interface Registry<T extends Keyed> extends Iterable<T> {
             this(type, Predicates.<T>alwaysTrue());
         }
 
-        protected SimpleRegistry(@NotNull Class<T> type, @NotNull Predicate<T> predicate) {
-            ImmutableMap.Builder<NamespacedKey, T> builder = ImmutableMap.builder();
-
-            for (T entry : type.getEnumConstants()) {
-                if (predicate.test(entry)) {
-                    builder.put(entry.getKey(), entry);
-                }
+    protected SimpleRegistry(@NotNull Class<T> type, @NotNull Predicate<T> predicate) {
+        this.type = type;
+        this.map = new ConcurrentHashMap<>();
+        for (T entry : type.getEnumConstants()) {
+            if (predicate.test(entry)) {
+                map.put(entry.getKey(), entry);
             }
+        }
+    }
 
-            map = builder.build();
-            this.type = type;
+        public void register(@NotNull T value) {
+            map.put(value.getKey(), value);
+        }
+        public void unregister(@NotNull NamespacedKey key) {
+            map.remove(key);
         }
 
         @Nullable

@@ -1944,7 +1944,7 @@ class CraftMetaItem implements ItemMeta, Damageable, Repairable, BlockDataMeta {
                         CraftMetaItem.MAX_DAMAGE.TYPE,
                         CraftMetaItem.CUSTOM_DATA.TYPE,
                         CraftMetaItem.ATTRIBUTES.TYPE,
-                        CraftMetaArmor.TRIM.TYPE,
+                        //CraftMetaArmor.TRIM.TYPE,
                         CraftMetaArmorStand.ENTITY_TAG.TYPE,
                         CraftMetaBanner.PATTERNS.TYPE,
                         CraftMetaEntityTag.ENTITY_TAG.TYPE,
